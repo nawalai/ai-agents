@@ -59,6 +59,27 @@ Hi, I'm Nawal — I build practical, working AI agents using no-code/low-code to
 
 ---
 
+## Project 4: AI Appointment Booking Agent — Bloom Hair & Beauty Salon (Portfolio Demo)
+
+**Problem:** Small service businesses handle appointment booking manually — checking calendar availability and confirming details back and forth requires a staff member to be available for every request.
+
+**What I built:** A conversational AI agent (built for a fictional salon as a portfolio demonstration) that:
+1. Holds a natural, multi-turn conversation, remembering earlier context instead of re-asking questions
+2. Checks real Google Calendar availability before confirming a booking
+3. Creates the actual calendar event once the customer confirms all details
+4. Asks clarifying follow-up questions when a request is incomplete, rather than guessing
+
+**Why this matters:** Unlike my other lead-agent projects (single-shot classification), this uses n8n's **AI Agent** architecture — Chat Model + Memory + Tools — where the model autonomously decides which tool to call and when, based on the live conversation. This is the fullest expression of "LLM + tools + memory + goal" in this portfolio.
+
+**Tools used:** n8n (AI Agent, Chat Trigger), Google Gemini, Google Calendar API
+
+📹 [Demo video](./bloom-booking-agent/demo.mp4)
+🖼️ [Screenshots](./bloom-booking-agent/screenshots/)
+📄 [Exported workflow (JSON)](./bloom-booking-agent/bloom-booking-agent.json)
+📝 [Full case study](./bloom-booking-agent/README.md)
+
+---
+
 ## Skills demonstrated across these projects
 - Prompt engineering for structured, parseable AI outputs
 - Conditional workflow logic (branching, routing based on AI decisions)
