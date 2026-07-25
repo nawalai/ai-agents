@@ -1,0 +1,332 @@
+{
+  "name": "propercare lead agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1SMaFln1UePz2WuGUxsJPU3Tarr0TPjPEnws2gEN3eZ8",
+          "mode": "list",
+          "cachedResultName": "propercare online free consultation (Responses)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SMaFln1UePz2WuGUxsJPU3Tarr0TPjPEnws2gEN3eZ8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 150794461,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SMaFln1UePz2WuGUxsJPU3Tarr0TPjPEnws2gEN3eZ8/edit#gid=150794461"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        -32
+      ],
+      "id": "7faa7de7-4266-48d5-8694-c5cfb88343e1",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "FOOqCzH0uFpjFY9k",
+          "name": "Google Sheets Trigger account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a lead qualification assistant for ProperCareOnline, a company that provides virtual assistants and outsourced support (administrative, customer service, order processing, dispatching, property management, tech support) to businesses like property managers, landlords, and short-term rental hosts.\n\nA new lead submitted this inquiry:\nCompany: {{ $json['Company Name'] }}\nService interested in: {{ $json['Which service are you interested in?'] }}\nDetails: {{ $json['Tell us about your need'] }}\n\nClassify this lead as HOT, WARM, or COLD:\n- HOT: mentions urgency, a specific number of properties/units/high call volume, or a clear budget/timeline\n- WARM: general interest, exploring options, no urgency mentioned\n- COLD: vague inquiry, just comparing prices, very short/unclear message\n\nThen write a short, professional, friendly reply (3-4 sentences) thanking them for their interest, briefly addressing their specific need, and mentioning the one-week free trial.\n\nRespond ONLY in this exact format:\nClassification: [HOT/WARM/COLD]\nReply: [your reply here]",
+        "needsFallback": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -976,
+        -16
+      ],
+      "id": "e0f12148-7119-456f-aa6f-210a351d2aae",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "waitBetweenTries": 5
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -1120,
+        192
+      ],
+      "id": "560c7417-9137-4803-96b1-1bdf763a4ebe",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "d5SHoWWgF7aV0yyR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bb6b8013-0b1f-4303-b2c1-37ccc28fc43c",
+              "name": "classification",
+              "value": "={{ $json.text.match(/Classification:\\s*(\\w+)/)[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "bb558472-53c6-402f-926c-3f9ba9ba670d",
+              "name": "reply",
+              "value": "={{ $json.text.match(/Reply:\\s*([\\s\\S]*)/)[1] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -656,
+        -16
+      ],
+      "id": "a1862e89-25c5-4d52-8700-9dd6afa2985f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.classification }}",
+                    "rightValue": "HOT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1645696e-6856-4fc7-a29d-9f19a85236d4"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0b4928f4-728a-4440-903f-a8880e68d7dd",
+                    "leftValue": "={{ $json.classification }}",
+                    "rightValue": "WARM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -688,
+        176
+      ],
+      "id": "52b3a276-03db-49ca-866c-e5e2d3746ec3",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "nawalsalman1603@gmail.com",
+        "subject": "Thanks for reaching out to ProperCareOnline",
+        "emailType": "text",
+        "message": "={{ $json.reply }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -480,
+        176
+      ],
+      "id": "62d7db9b-8bed-4d1f-9907-05a8911a0f75",
+      "name": "Send a message",
+      "webhookId": "b6bafebd-6184-4ff9-971d-be7d76f8cedc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CT2FblUQHVSksbnP",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email address'] }}",
+        "subject": "Thanks for reaching out to ProperCareOnline",
+        "emailType": "text",
+        "message": "={{ $json.reply }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        320
+      ],
+      "id": "fcc0c607-ff91-45e5-8bfb-24d39629200b",
+      "name": "Send a message1",
+      "webhookId": "27849116-b1cd-4146-87d1-1cc62c3d16f3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CT2FblUQHVSksbnP",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -992,
+        288
+      ],
+      "id": "6072865e-7529-40f3-ab4f-46b60c9866df",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "d5SHoWWgF7aV0yyR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "04ebcecd-925c-4df1-af76-17a1236b3acc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "678421caff78be8edd39afc947253c3c7096ac89b6cd67ff4d6ca9034d0ae668"
+  },
+  "nodeGroups": [],
+  "id": "l33F3Aiy7Yn7WvtP",
+  "tags": []
+}
