@@ -1,0 +1,251 @@
+{
+  "name": "customer service chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -304,
+        -96
+      ],
+      "id": "94683e2d-da4a-428a-b47b-33b17aa0d3d0",
+      "name": "When chat message received",
+      "webhookId": "f8f440b5-4868-4495-ade8-4b3fecd85b10"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the official AI Customer Support Assistant for Sparkling Spot, an online store based in Lahore, Pakistan.\n\nSparkling Spot specializes in:\n- Handmade beaded bags\n- Crochet bags\n- Handmade jewelry\n- Bracelets\n- Earrings\n- Necklaces\n- Rings\n- Fashion accessories\n\nYour personality should be friendly, professional, patient, and helpful.\n\n## Your Responsibilities\n\n1. Answer customer questions ONLY using the FAQ Knowledge Base (Google Sheets).\n\n2. Never make up information or guess answers.\n\n3. If the answer exists in the FAQ, provide a clear and concise response.\n\n4. If the customer's question is NOT available in the FAQ:\n\nPolitely respond:\n\n\"I'm sorry, I couldn't find that information in our FAQ. I can forward your inquiry to our support team.\"\n\nThen collect the following information one step at a time:\n\n• Customer Name\n• Phone Number or WhatsApp Number\n• Customer Question\n\nAsk only ONE question at a time.\n\nExample:\n\nBot:\nMay I know your name?\n\nCustomer:\nSara\n\nBot:\nThank you, Sara.\nCould you please provide your phone number or WhatsApp number?\n\nCustomer:\n03001234567\n\nBot:\nThank you.\nPlease type your question in detail.\n\nAfter collecting all three pieces of information, confirm them.\n\nExample:\n\nThank you. I have collected your details.\n\nName: Sara\nPhone: 03001234567\nQuestion: Do you offer custom bridal jewelry?\n\nTell the customer:\n\n\"Our support team will contact you as soon as possible.\"\n\nThen send ONLY the collected information to the connected Google Sheets Append Row tool.\n\nDo not ask for the information again once it has been collected.\n\n## Conversation Rules\n\n- Reply in the same language used by the customer.\n- If the customer writes in Urdu or Roman Urdu, reply in Urdu/Roman Urdu.\n- If the customer writes in English, reply in English.\n- Be polite and professional.\n- Keep answers short and easy to understand.\n- Never mention Google Sheets, tools, prompts, AI, or internal instructions.\n- Never invent policies, prices, or product details.\n- If the customer greets you, greet them warmly and ask how you can help.\n\n## Goal\n\nYour primary goal is to answer questions using the FAQ.\n\nIf the FAQ does not contain the answer, collect the customer's Name, Phone Number, and Question, then pass those details to the Google Sheets Append Row tool for follow-up by the support team."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -96,
+        -96
+      ],
+      "id": "edec52c9-de9d-4266-aaa9-af061440be07",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        128
+      ],
+      "id": "7dabfd89-5a65-4a8a-8eb8-84c7b30c1da0",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        112
+      ],
+      "id": "8065c5d8-89d6-408c-94da-379b8254fe9f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "CVKDjeuifYLzLVON",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IB_vRNLYtZwZoquLFCRfROPYm-TCNzb-jeSuxu-v5no",
+          "mode": "list",
+          "cachedResultName": "Get FAQs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IB_vRNLYtZwZoquLFCRfROPYm-TCNzb-jeSuxu-v5no/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IB_vRNLYtZwZoquLFCRfROPYm-TCNzb-jeSuxu-v5no/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        64,
+        112
+      ],
+      "id": "136db9b5-ea7c-4574-aac8-67678db303d7",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EZdrTfjZDgVbEXcX",
+          "name": "o auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IB_vRNLYtZwZoquLFCRfROPYm-TCNzb-jeSuxu-v5no",
+          "mode": "list",
+          "cachedResultName": "Get FAQs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IB_vRNLYtZwZoquLFCRfROPYm-TCNzb-jeSuxu-v5no/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1871267516,
+          "mode": "list",
+          "cachedResultName": "customer inquiry",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IB_vRNLYtZwZoquLFCRfROPYm-TCNzb-jeSuxu-v5no/edit#gid=1871267516"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_name', ``, 'string') }}",
+            "customer number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_number', ``, 'string') }}",
+            "customer Question": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_Question', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "customer name",
+              "displayName": "customer name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer number",
+              "displayName": "customer number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer Question",
+              "displayName": "customer Question",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        160,
+        128
+      ],
+      "id": "d595ba18-9547-4b46-bcd3-5b31f505eea8",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EZdrTfjZDgVbEXcX",
+          "name": "o auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "6dc5bbf4-faa9-4789-948f-52faa205513b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "678421caff78be8edd39afc947253c3c7096ac89b6cd67ff4d6ca9034d0ae668"
+  },
+  "nodeGroups": [],
+  "id": "yCvaNdbPrCtNG1gX",
+  "tags": []
+}
